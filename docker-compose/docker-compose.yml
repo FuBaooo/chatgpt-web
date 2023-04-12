@@ -3,7 +3,7 @@ version: '3'
 services:
   app:
     container_name: chatgpt-web
-    image: chenzhaoyu94/chatgpt-web # 总是使用latest,更新时重新pull该tag镜像即可
+    image: FuBaooo/chatgpt-web # 总是使用latest,更新时重新pull该tag镜像即可
     ports:
       - 3002:3002
     environment:
@@ -33,9 +33,9 @@ services:
       SOCKS_PROXY_PASSWORD:
       # HTTPS_PROXY 代理，可选
       HTTPS_PROXY:
-			# LOGTO 入口
+      # LOGTO 入口
       VITE_LOGTO_ENDPOINT:
-			# LOGTO APPID
+      # LOGTO APPID
       VITE_LOGTO_APPID:
   nginx:
     container_name: nginx
