@@ -1,8 +1,7 @@
 <script setup lang='ts'>
-import { computed, ref } from 'vue'
-import { NButton, NInput, NModal, useMessage } from 'naive-ui'
-import { fetchVerify } from '@/api'
-import { useAuthStore } from '@/store'
+import { ref } from 'vue'
+import { NButton, NModal } from 'naive-ui'
+import { useLogto } from '@logto/vue'
 import Icon403 from '@/icons/403.vue'
 
 interface Props {
@@ -11,43 +10,13 @@ interface Props {
 
 defineProps<Props>()
 
-const authStore = useAuthStore()
-
-const ms = useMessage()
-
 const loading = ref(false)
-const token = ref('')
 
-const disabled = computed(() => !token.value.trim() || loading.value)
+const { signIn } = useLogto()
 
-async function handleVerify() {
-  const secretKey = token.value.trim()
-
-  if (!secretKey)
-    return
-
-  try {
-    loading.value = true
-    await fetchVerify(secretKey)
-    authStore.setToken(secretKey)
-    ms.success('success')
-    window.location.reload()
-  }
-  catch (error: any) {
-    ms.error(error.message ?? 'error')
-    authStore.removeToken()
-    token.value = ''
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-function handlePress(event: KeyboardEvent) {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault()
-    handleVerify()
-  }
+async function handleLogin() {
+  loading.value = true
+  signIn(`${window.location.origin}/callback`)
 }
 </script>
 
@@ -64,15 +33,13 @@ function handlePress(event: KeyboardEvent) {
           </p>
           <Icon403 class="w-[200px] m-auto" />
         </header>
-        <NInput v-model:value="token" type="password" placeholder="" @keypress="handlePress" />
         <NButton
           block
           type="primary"
-          :disabled="disabled"
           :loading="loading"
-          @click="handleVerify"
+          @click="handleLogin"
         >
-          {{ $t('common.verify') }}
+          {{ $t('common.login') }}
         </NButton>
       </div>
     </div>

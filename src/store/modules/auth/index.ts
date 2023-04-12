@@ -1,22 +1,24 @@
 import { defineStore } from 'pinia'
-import { getToken, removeToken, setToken } from './helper'
+import type { useLogto } from '@logto/vue'
+import { getToken, removeToken } from './helper'
 import { store } from '@/store'
 import { fetchSession } from '@/api'
 
 interface SessionResponse {
-  auth: boolean
   model: 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI'
 }
 
 export interface AuthState {
   token: string | undefined
   session: SessionResponse | null
+  getAccessToken: ReturnType<typeof useLogto>['getAccessToken'] | null
 }
 
 export const useAuthStore = defineStore('auth-store', {
   state: (): AuthState => ({
     token: getToken(),
     session: null,
+    getAccessToken: null,
   }),
 
   getters: {
@@ -37,9 +39,8 @@ export const useAuthStore = defineStore('auth-store', {
       }
     },
 
-    setToken(token: string) {
-      this.token = token
-      setToken(token)
+    setAccessTokenFn(fn: ReturnType<typeof useLogto>['getAccessToken'] | null) {
+      this.getAccessToken = fn
     },
 
     removeToken() {

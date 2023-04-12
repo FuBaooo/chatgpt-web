@@ -6,8 +6,9 @@ const service = axios.create({
 })
 
 service.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore().token
+  async (config) => {
+    const { getAccessToken } = useAuthStore()
+    const token = await getAccessToken?.(`${window.location.origin}/api`)
     if (token)
       config.headers.Authorization = `Bearer ${token}`
     return config

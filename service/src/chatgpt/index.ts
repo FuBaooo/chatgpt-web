@@ -5,6 +5,7 @@ import { ChatGPTAPI, ChatGPTUnofficialProxyAPI } from 'chatgpt'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import httpsProxyAgent from 'https-proxy-agent'
 import fetch from 'node-fetch'
+import { getTokenCount } from 'src/utils/tokenizer'
 import { sendResponse } from '../utils'
 import { isNotEmptyString } from '../utils/is'
 import type { ApiModel, ChatContext, ChatGPTUnofficialProxyAPIOptions, ModelConfig } from '../types'
@@ -103,10 +104,12 @@ async function chatReplyProcess(options: RequestOptions) {
     const response = await api.sendMessage(message, {
       ...options,
       onProgress: (partialResponse) => {
-        process?.(partialResponse)
+        process?.({
+          ...partialResponse,
+          ...({ usage: getTokenCount(message) + getTokenCount(partialResponse.text) }) as any,
+        })
       },
     })
-
     return sendResponse({ type: 'Success', data: response })
   }
   catch (error: any) {

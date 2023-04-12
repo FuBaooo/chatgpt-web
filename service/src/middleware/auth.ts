@@ -1,21 +1,29 @@
-import { isNotEmptyString } from '../utils/is'
+import type { IncomingHttpHeaders } from 'http'
+import { createRemoteJWKSet, jwtVerify } from 'jose'
+
+const extractBearerTokenFromHeaders = ({ authorization }: IncomingHttpHeaders) => {
+  if (!authorization)
+    throw new Error('Error: 无访问权限 | No access rights')
+
+  if (!authorization.startsWith('Bearer'))
+    throw new Error('Error: 无访问权限 | No access rights')
+
+  return authorization.slice('Bearer'.length + 1)
+}
 
 const auth = async (req, res, next) => {
-  const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY
-  if (isNotEmptyString(AUTH_SECRET_KEY)) {
-    try {
-      const Authorization = req.header('Authorization')
-      if (!Authorization || Authorization.replace('Bearer ', '').trim() !== AUTH_SECRET_KEY.trim())
-        throw new Error('Error: 无访问权限 | No access rights')
-      next()
-    }
-    catch (error) {
-      res.send({ status: 'Unauthorized', message: error.message ?? 'Please authenticate.', data: null })
-    }
-  }
-  else {
-    next()
-  }
+  // Extract the token
+  const token = extractBearerTokenFromHeaders(req.headers)
+
+  await jwtVerify(
+    token,
+    createRemoteJWKSet(new URL(`${process.env.VITE_LOGTO_ENDPOINT}/oidc/jwks`)),
+    {
+      issuer: `${process.env.VITE_LOGTO_ENDPOINT}/oidc`,
+    },
+  )
+
+  return next()
 }
 
 export { auth }
