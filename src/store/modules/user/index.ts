@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { UserInfo, UserState } from './helper'
 import { defaultSetting, getLocalState, setLocalState } from './helper'
+import { fetchUsage } from '@/api'
 
 export const useUserStore = defineStore('user-store', {
   state: (): UserState => getLocalState(),
@@ -17,6 +18,13 @@ export const useUserStore = defineStore('user-store', {
 
     recordState() {
       setLocalState(this.$state)
+    },
+
+    async refreshUsage() {
+      if (this.userInfo.maxUsage !== -1)
+        return
+      const res = await fetchUsage<Partial<UserInfo>>()
+      this.updateUserInfo(res.data)
     },
   },
 })

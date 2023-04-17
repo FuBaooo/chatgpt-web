@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { NButton, NInput, NSlider, useMessage } from 'naive-ui'
-import { useSettingStore } from '@/store'
+import { computed, ref } from 'vue'
+import { NButton, NInput, NSelect, NSlider, NTooltip, useMessage } from 'naive-ui'
+import { useSettingStore, useUserStore } from '@/store'
 import type { SettingsState } from '@/store/modules/settings/helper'
 import { t } from '@/locales'
 
 const settingStore = useSettingStore()
+const userStore = useUserStore()
 
 const ms = useMessage()
 
@@ -13,7 +14,11 @@ const systemMessage = ref(settingStore.systemMessage ?? '')
 
 const temperature = ref(settingStore.temperature ?? 0.5)
 
-const top_p = ref(settingStore.top_p ?? 1)
+const model = ref(settingStore.model ?? 'gpt-3.5-turbo')
+
+const models = computed(() => (userStore.userInfo.models.split(',') ?? []).map(i => ({ label: i, value: i })))
+
+// const top_p = ref(settingStore.top_p ?? 1)
 
 function updateSettings(options: Partial<SettingsState>) {
   settingStore.updateSetting(options)
@@ -40,7 +45,15 @@ function handleReset() {
         </NButton>
       </div>
       <div class="flex items-center space-x-4">
-        <span class="flex-shrink-0 w-[120px]">{{ $t('setting.temperature') }} </span>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <span class="flex-shrink-0 w-[120px]">
+              {{ $t('setting.temperature') }}
+            </span>
+          </template>
+          {{ $t('setting.temperature_tips') }}
+        </NTooltip>
+
         <div class="flex-1">
           <NSlider v-model:value="temperature" :max="1" :min="0" :step="0.1" />
         </div>
@@ -49,7 +62,23 @@ function handleReset() {
           {{ $t('common.save') }}
         </NButton>
       </div>
-      <div class="flex items-center space-x-4">
+      <div v-if="models.length > 1" class="flex items-center space-x-4">
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <span class="flex-shrink-0 w-[120px]">
+              {{ $t('setting.models') }}
+            </span>
+          </template>
+          {{ $t('setting.models_tips') }}
+        </NTooltip>
+        <div class="flex-1">
+          <NSelect v-model:value="model" :options="models" />
+        </div>
+        <NButton size="tiny" text type="primary" @click="updateSettings({ model })">
+          {{ $t('common.save') }}
+        </NButton>
+      </div>
+      <!-- <div class="flex items-center space-x-4">
         <span class="flex-shrink-0 w-[120px]">{{ $t('setting.top_p') }} </span>
         <div class="flex-1">
           <NSlider v-model:value="top_p" :max="1" :min="0" :step="0.1" />
@@ -58,7 +87,7 @@ function handleReset() {
         <NButton size="tiny" text type="primary" @click="updateSettings({ top_p })">
           {{ $t('common.save') }}
         </NButton>
-      </div>
+      </div> -->
       <div class="flex items-center space-x-4">
         <span class="flex-shrink-0 w-[120px]">&nbsp;</span>
         <NButton size="small" @click="handleReset">

@@ -24,8 +24,6 @@ const avatar = ref(userInfo.value.avatar ?? '')
 
 const name = ref(userInfo.value.name ?? '')
 
-const description = ref(userInfo.value.description ?? '')
-
 const language = computed({
   get() {
     return appStore.language
@@ -55,8 +53,6 @@ const themeOptions: { label: string; key: Theme; icon: string }[] = [
 
 const languageOptions: { label: string; key: Language; value: Language }[] = [
   { label: '简体中文', key: 'zh-CN', value: 'zh-CN' },
-  { label: '繁體中文', key: 'zh-TW', value: 'zh-TW' },
-  { label: 'English', key: 'en-US', value: 'en-US' },
 ]
 
 function updateUserInfo(options: Partial<UserInfo>) {
@@ -64,11 +60,11 @@ function updateUserInfo(options: Partial<UserInfo>) {
   ms.success(t('common.success'))
 }
 
-function handleReset() {
-  userStore.resetUserInfo()
-  ms.success(t('common.success'))
-  window.location.reload()
-}
+// function handleReset() {
+//   userStore.resetUserInfo()
+//   ms.success(t('common.success'))
+//   window.location.reload()
+// }
 
 function exportData(): void {
   const date = getCurrentDate()
@@ -141,15 +137,6 @@ function handleImportButtonClick(): void {
           {{ $t('common.save') }}
         </NButton>
       </div>
-      <div class="flex items-center space-x-4">
-        <span class="flex-shrink-0 w-[100px]">{{ $t('setting.description') }}</span>
-        <div class="flex-1">
-          <NInput v-model:value="description" placeholder="" />
-        </div>
-        <NButton size="tiny" text type="primary" @click="updateUserInfo({ description })">
-          {{ $t('common.save') }}
-        </NButton>
-      </div>
       <div
         class="flex items-center space-x-4"
         :class="isMobile && 'items-start'"
@@ -212,12 +199,12 @@ function handleImportButtonClick(): void {
           />
         </div>
       </div>
-      <div class="flex items-center space-x-4">
+      <!-- <div class="flex items-center space-x-4">
         <span class="flex-shrink-0 w-[100px]">{{ $t('setting.resetUserInfo') }}</span>
         <NButton size="small" @click="handleReset">
           {{ $t('common.reset') }}
         </NButton>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

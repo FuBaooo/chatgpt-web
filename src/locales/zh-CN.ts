@@ -59,7 +59,8 @@ export default {
     name: '名称',
     description: '描述',
     role: '角色设定',
-    temperature: 'Temperature',
+    temperature: '回复固定度',
+    temperature_tips: '控制语言模型输出的随机性或创造性的参数。当使用语言模型生成文本时，它通常会输出根据输入和先前训练数据确定为最可能的单词或词序列。然而，增加输出的随机性可以帮助模型创建更具创意和有趣的输出。选项实际上控制着随机性的程度。设置为较低的值将导致输出更可预测和重复，而较高会导致更多种类和不可预测的输出。例如，将设置为0.5将导致较保守的输出，而为1将创建更富创意和自发的输出。需要注意的是，理想的值将取决于具体的任务和上下文，因此可能需要一些实验来找到适合您需要的正确值。',
     top_p: 'Top_p',
     resetUserInfo: '重置用户信息',
     chatHistory: '聊天记录',
@@ -72,6 +73,8 @@ export default {
     httpsProxy: 'HTTPS Proxy',
     balance: 'API余额',
     monthlyUsage: '本月使用量',
+    models: '模型',
+    models_tips: '每个模型可以记忆的上下文数据大小最后没有明确说，gpt-4默认为8kb，gpt-3默认为4kb，不建议选择太大的，一般用不上，并且消费是普通的十几倍',
   },
   store: {
     siderButton: '提示词商店',
@@ -90,5 +93,9 @@ export default {
     importRepeatContent: '内容重复跳过：{msg}',
     onlineImportWarning: '注意：请检查 JSON 文件来源！',
     downloadError: '请检查网络状态与 JSON 文件有效性',
+    pleaseLogin: '请先登录',
+    logOut: '退出登录',
+    usage: '使用量',
+    unlimited: '无限制',
   },
 }

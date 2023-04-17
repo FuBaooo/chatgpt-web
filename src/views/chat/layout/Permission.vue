@@ -1,9 +1,11 @@
 <script setup lang='ts'>
 import { computed, ref } from 'vue'
-import { NButton, NInput, NModal, useMessage } from 'naive-ui'
+import type { FormItemRule } from 'naive-ui'
+import { NButton, NForm, NFormItem, NInput, NModal, useMessage } from 'naive-ui'
 import { fetchVerify } from '@/api'
-import { useAuthStore } from '@/store'
+import { useAuthStore, useUserStore } from '@/store'
 import Icon403 from '@/icons/403.vue'
+import type { UserInfo } from '@/store/modules/user/helper'
 
 interface Props {
   visible: boolean
@@ -12,31 +14,58 @@ interface Props {
 defineProps<Props>()
 
 const authStore = useAuthStore()
+const userStore = useUserStore()
 
 const ms = useMessage()
 
 const loading = ref(false)
-const token = ref('')
-
-const disabled = computed(() => !token.value.trim() || loading.value)
+const formValue = ref({ username: '', password: '' })
+const rules = ref({
+  username: {
+    required: true,
+    trigger: ['input', 'blur'],
+    validator: (rule: FormItemRule, value: string) => {
+      return new Promise<void>((resolve, reject) => {
+        if (!value.trim())
+          reject(Error('请输入账号'))
+        resolve()
+      })
+    },
+  },
+  password: {
+    required: true,
+    trigger: ['input', 'blur'],
+    validator: (rule: FormItemRule, value: string) => {
+      return new Promise<void>((resolve, reject) => {
+        if (!value.trim())
+          reject(Error('请输入密码'))
+        resolve()
+      })
+    },
+  },
+})
+const disabled = computed(() => !formValue.value.username.trim() || !formValue.value.password.trim() || loading.value)
 
 async function handleVerify() {
-  const secretKey = token.value.trim()
+  const a = formValue.value.username.trim()
+  const p = formValue.value.password.trim()
 
-  if (!secretKey)
+  if (!a || !p)
     return
 
   try {
     loading.value = true
-    await fetchVerify(secretKey)
-    authStore.setToken(secretKey)
+    const { data: { token, user } } = await fetchVerify<{ token: string; user: UserInfo }>(a, p)
+    authStore.setToken(token)
     ms.success('success')
-    window.location.reload()
+    userStore.updateUserInfo(user)
+    // window.location.reload()
   }
   catch (error: any) {
     ms.error(error.message ?? 'error')
     authStore.removeToken()
-    token.value = ''
+    formValue.value.username = ''
+    formValue.value.password = ''
   }
   finally {
     loading.value = false
@@ -64,16 +93,19 @@ function handlePress(event: KeyboardEvent) {
           </p>
           <Icon403 class="w-[200px] m-auto" />
         </header>
-        <NInput v-model:value="token" type="password" placeholder="" @keypress="handlePress" />
-        <NButton
-          block
-          type="primary"
-          :disabled="disabled"
-          :loading="loading"
-          @click="handleVerify"
-        >
-          {{ $t('common.verify') }}
-        </NButton>
+        <NForm ref="formRef" :label-width="80" :model="formValue" :rules="rules">
+          <NFormItem label="账户" path="user.name">
+            <NInput v-model:value="formValue.username" placeholder="请输入账户" />
+          </NFormItem>
+          <NFormItem label="密码" path="user.age">
+            <NInput v-model:value="formValue.password" type="password" placeholder="请输入密码" @keypress="handlePress" />
+          </NFormItem>
+          <NFormItem>
+            <NButton block type="primary" :disabled="disabled" :loading="loading" @click="handleVerify">
+              {{ $t('common.verify') }}
+            </NButton>
+          </NFormItem>
+        </NForm>
       </div>
     </div>
   </NModal>

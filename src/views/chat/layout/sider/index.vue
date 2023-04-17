@@ -1,10 +1,10 @@
 <script setup lang='ts'>
 import type { CSSProperties } from 'vue'
 import { computed, ref, watch } from 'vue'
-import { NButton, NLayoutSider } from 'naive-ui'
+import { NButton, NLayoutSider, NProgress } from 'naive-ui'
 import List from './List.vue'
 import Footer from './Footer.vue'
-import { useAppStore, useChatStore } from '@/store'
+import { useAppStore, useChatStore, useUserStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { PromptStore } from '@/components/common'
 
@@ -55,18 +55,25 @@ watch(
     flush: 'post',
   },
 )
+
+const userStore = useUserStore()
+
+const userInfo = computed(() => userStore.userInfo)
+const maxUsage = computed(() => (userInfo.value.maxUsage / 1000).toFixed(0))
+const userUsage = computed(() => (userInfo.value.userUsage / 1000).toFixed(1))
+const percentage = computed(() => {
+  const { userUsage, maxUsage } = userInfo.value
+  if (maxUsage === -1)
+    return 0
+
+  return Math.floor(userUsage / maxUsage * 100)
+})
 </script>
 
 <template>
   <NLayoutSider
-    :collapsed="collapsed"
-    :collapsed-width="0"
-    :width="260"
-    :show-trigger="isMobile ? false : 'arrow-circle'"
-    collapse-mode="transform"
-    position="absolute"
-    bordered
-    :style="getMobileClass"
+    :collapsed="collapsed" :collapsed-width="0" :width="260" :show-trigger="isMobile ? false : 'arrow-circle'"
+    collapse-mode="transform" position="absolute" bordered :style="getMobileClass"
     @update-collapsed="handleUpdateCollapsed"
   >
     <div class="flex flex-col h-full" :style="mobileSafeArea">
@@ -86,6 +93,12 @@ watch(
         </div>
       </main>
       <Footer />
+      <div class="w-full px-4 pb-4">
+        {{ $t('store.usage') }}: {{ userInfo.maxUsage === -1 ? $t('store.unlimited') : `${userUsage}/${maxUsage} (千字)` }}
+      </div>
+      <div v-if="userInfo.maxUsage !== -1" class="w-full px-4 pb-4">
+        <NProgress type="line" :percentage="percentage" />
+      </div>
     </div>
   </NLayoutSider>
   <template v-if="isMobile">

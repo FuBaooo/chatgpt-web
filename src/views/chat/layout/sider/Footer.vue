@@ -1,5 +1,6 @@
 <script setup lang='ts'>
 import { defineAsyncComponent, ref } from 'vue'
+import { } from 'naive-ui'
 import { HoverButton, SvgIcon, UserAvatar } from '@/components/common'
 
 const Setting = defineAsyncComponent(() => import('@/components/common/Setting/index.vue'))
