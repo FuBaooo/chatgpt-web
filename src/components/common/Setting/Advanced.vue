@@ -51,7 +51,7 @@ function handleReset() {
               {{ $t('setting.temperature') }}
             </span>
           </template>
-          {{ $t('setting.temperature_tips') }}
+          {{ $t('setting.temperatureTips') }}
         </NTooltip>
 
         <div class="flex-1">
@@ -69,7 +69,7 @@ function handleReset() {
               {{ $t('setting.models') }}
             </span>
           </template>
-          {{ $t('setting.models_tips') }}
+          {{ $t('setting.modelsTips') }}
         </NTooltip>
         <div class="flex-1">
           <NSelect v-model:value="model" :options="models" />
